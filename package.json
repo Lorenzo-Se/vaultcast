@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raycast-pwm",
+  "name": "vaultcast",
   "title": "Vaultcast",
   "description": "Search, copy and paste credentials from CLI-based password managers",
   "icon": "icon.png",
-  "author": "seml",
+  "author": "SemL",
   "categories": [
     "Security"
   ],
@@ -43,8 +43,9 @@
       "type": "textfield",
       "required": false,
       "title": "External Adapters Directory",
-      "description": "Path to a folder containing third-party adapter subfolders (each with pwm-adapter.json), e.g. ~/.config/raycast-pwm/adapters on macOS or %USERPROFILE%\\.config\\raycast-pwm\\adapters on Windows",
-      "placeholder": "~/.config/raycast-pwm/adapters"
+      "description": "Folder containing third-party adapter subfolders (each with pwm-adapter.json). Defaults to ~/.config/vaultcast/adapters (%USERPROFILE%\\.config\\vaultcast\\adapters on Windows).",
+      "placeholder": "~/.config/vaultcast/adapters",
+      "default": "~/.config/vaultcast/adapters"
     },
     {
       "name": "defaultManagerOverride",
@@ -84,44 +85,34 @@
       "required": false,
       "default": true,
       "label": "Enable extension session",
-      "description": "Use a dedicated extension session. Password managers are re-unlocked automatically until the session expires or Raycast quits."
+      "description": "Keep your master password/PIN in memory and re-unlock password managers automatically until the session times out or Raycast quits. Nothing is written to disk."
     },
     {
       "name": "sessionTimeoutMinutes",
       "type": "textfield",
       "required": false,
       "title": "Session timeout (minutes)",
-      "description": "Lock after this many minutes of inactivity (1–1440). With extension session: unlock with Touch ID to resume. Without: unlock the password manager again.",
+      "description": "Lock after this many minutes of inactivity (1–1440). With extension session: unlock with Touch ID (macOS) to resume. Without: unlock the password manager again.",
       "default": "15",
       "placeholder": "15"
-    },
-    {
-      "name": "persistCredentialsInKeychain",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Remember in Keychain",
-      "description": "macOS only. Store credentials in Keychain so you can unlock with Touch ID after Raycast restarts. When off, credentials live only until Raycast quits."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
   "scripts": {
     "sync-preferences": "node scripts/sync-preferences.mjs",
-    "build-biometric": "node scripts/build-biometric-auth.mjs",
-    "build-session-helper": "node scripts/build-session-helper.mjs",
-    "build": "npm run sync-preferences && npm run build-biometric && npm run build-session-helper && ray build -e dev -o \"$HOME/.config/raycast/extensions/raycast-pwm\"",
-    "dev": "npm run build-biometric && npm run build-session-helper && ray develop",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",

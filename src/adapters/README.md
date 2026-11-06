@@ -120,14 +120,14 @@ Adapter können auch **außerhalb der Extension** liegen und per JSON-Stdio-Prot
 
 ### Setup
 
-1. Adapter-Ordner anlegen, z. B. `~/.config/raycast-pwm/adapters/my-adapter/`
+1. Adapter-Ordner anlegen, z. B. `~/.config/vaultcast/adapters/my-adapter/`
 2. `pwm-adapter.json` + ausführbares Script hinzufügen
 3. In den Extension-Einstellungen **External Adapters Directory** auf den übergeordneten Ordner setzen
 
 Beispiel:
 
 ```
-~/.config/raycast-pwm/adapters/
+~/.config/vaultcast/adapters/
   my-adapter/
     pwm-adapter.json
     adapter.js
@@ -168,25 +168,21 @@ Session:
 
 ### Touch ID (macOS)
 
-Die Logik liegt nur in der Extension (`src/utils/credential-vault.ts`, `src/utils/biometric-auth.ts` + Swift-CLI `swift/BiometricAuth/main.swift`). Adapter-Scripts (`adapter.js`) sehen weiterhin nur `authenticate(credentials)`.
+Die Logik liegt nur in der Extension (`src/utils/credential-vault.ts`, `src/utils/biometric-auth.ts` + Swift-Package `swift/` über die Raycast-Swift-Integration). Adapter-Scripts (`adapter.js`) sehen weiterhin nur `authenticate(credentials)`.
 
 Flow:
 
 1. User entsperrt mit Master-Passwort oder PIN (`getAuthRequirements` / `authenticate`).
 2. Wenn **Enable extension session** an ist: Credential-Map im Prozess-RAM (`src/utils/credential-vault.ts`). Password Manager, die sich selbst sperren, werden still mit diesen Credentials neu entsperrt.
 3. Timeout oder **Lock Session**: Helfer wird beendet, RAM bleibt. Re-Auth ist Touch ID / Apple Watch / Gerätecode über `LocalAuthentication` (kein Keychain-Read). Danach wieder stilles PWM-Unlock.
-4. Raycast komplett beenden: RAM ist weg. Nächster Start verlangt wieder Master-PW/PIN — außer **Remember in Keychain** ist an.
-5. Wenn **Remember in Keychain** an ist: Credential-Map als JSON in der Keychain, Service `raycast-pwm:<adapterId>`, `WhenUnlockedThisDeviceOnly` (dieses Gerät, kein iCloud-Sync). Nach einem Raycast-Neustart entsperrt Touch ID aus der Keychain und füllt das RAM wieder.
-6. Escape ohne laufenden Biometrie-Prompt: Helfer stirbt, Extension-Session bleibt aktiv bis Timeout oder Raycast-Quit.
-7. **Forget Touch ID credentials** löscht den Keychain-Eintrag. Pref aus: beim nächsten Formular-Unlock wird der Eintrag ebenfalls entfernt.
+4. Raycast komplett beenden: RAM ist weg. Nächster Start verlangt wieder Master-PW/PIN. Es wird nichts in der Keychain oder auf Disk gespeichert.
+5. Escape ohne laufenden Biometrie-Prompt: Helfer stirbt, Extension-Session bleibt aktiv bis Timeout oder Raycast-Quit.
 
 Limits:
 
 - macOS only; ohne Biometrie/Gerätecode fällt die UI auf das Formular zurück (Windows: nach Timeout immer Formular).
 - Der System-Prompt kann das Raycast-Fenster schließen. Währenddessen hält die Extension den Helfer (`biometricUnlockInProgress`). Nach Erfolg Search Passwords ggf. erneut öffnen.
-- **Raycast Store:** Extensions mit Keychain-Zugriff werden abgelehnt. Touch ID / Keychain ist für lokale / Dev-Builds gedacht.
-- Build kompiliert den Helfer mit **swiftc** (Command Line Tools reichen; `npm run build-biometric`). Ohne `swiftc` fällt Touch ID still auf das Formular zurück.
-- Der unsignierte Helfer kann Keychain-Items **nicht** mit Biometrie-ACL speichern (`errSecMissingEntitlement` / -34018). Speichern nutzt `WhenUnlockedThisDeviceOnly`; Touch ID/Watch/Passcode werden beim **Lesen** bzw. bei Presence-Checks per `LocalAuthentication` verlangt.
+- `ray build` / `ray develop` kompilieren das Swift-Package (Xcode 16.3+ nötig).
 
 Vollständige Protokollreferenz: Abschnitt **Externe Adapter** in dieser Datei; Beispiele unter `examples/external-adapter/`.
 

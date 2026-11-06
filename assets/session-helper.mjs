@@ -10,12 +10,12 @@ const DEFAULT_TIMEOUT_MINUTES = 15;
 const MIN_TIMEOUT_MINUTES = 1;
 const MAX_TIMEOUT_MINUTES = 1440;
 
-const scopePid = Number.parseInt(process.env.RAYCAST_PWM_SCOPE_PID ?? "", 10);
+const scopePid = Number.parseInt(process.env.VAULTCAST_SCOPE_PID ?? "", 10);
 const socketPath =
-  process.env.RAYCAST_PWM_SOCKET ??
+  process.env.VAULTCAST_SOCKET ??
   (process.platform === "win32"
-    ? `\\\\.\\pipe\\raycast-pwm-${scopePid}`
-    : join(tmpdir(), `raycast-pwm-helper-${scopePid}.sock`));
+    ? `\\\\.\\pipe\\vaultcast-${scopePid}`
+    : join(tmpdir(), `vaultcast-helper-${scopePid}.sock`));
 
 /** @type {Map<string, Record<string, string>>} */
 const credentialsByAdapter = new Map();
@@ -277,7 +277,7 @@ function shutdown() {
 }
 
 if (!Number.isFinite(scopePid) || scopePid <= 0) {
-  process.stderr.write("RAYCAST_PWM_SCOPE_PID is required\n");
+  process.stderr.write("VAULTCAST_SCOPE_PID is required\n");
   process.exit(1);
 }
 

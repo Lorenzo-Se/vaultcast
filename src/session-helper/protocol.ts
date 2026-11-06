@@ -73,8 +73,8 @@ import { join } from "path";
 
 export function sessionHelperSocketPath(scopePid: number): string {
   if (process.platform === "win32") {
-    return `\\\\.\\pipe\\raycast-pwm-${scopePid}`;
+    return `\\\\.\\pipe\\vaultcast-${scopePid}`;
   }
 
-  return join(tmpdir(), `raycast-pwm-helper-${scopePid}.sock`);
+  return join(tmpdir(), `vaultcast-helper-${scopePid}.sock`);
 }

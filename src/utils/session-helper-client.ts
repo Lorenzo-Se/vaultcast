@@ -93,8 +93,8 @@ async function spawnHelper(): Promise<void> {
       stdio: "ignore",
       env: {
         ...process.env,
-        RAYCAST_PWM_SCOPE_PID: String(pid),
-        RAYCAST_PWM_SOCKET: socketPath(),
+        VAULTCAST_SCOPE_PID: String(pid),
+        VAULTCAST_SOCKET: socketPath(),
       },
     });
     child.unref();

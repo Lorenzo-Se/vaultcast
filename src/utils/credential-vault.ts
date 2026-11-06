@@ -15,11 +15,10 @@ export type ExtensionSessionState = "disabled" | "empty" | "active" | "locked";
 
 export { parseSessionTimeoutMinutes } from "../session-helper/protocol";
 
-const GLOBAL_VAULT_KEY = "__raycastPwmExtensionSession";
+const GLOBAL_VAULT_KEY = "__vaultcastExtensionSession";
 
 type SessionPreferences = {
   enableExtensionSession?: boolean;
-  persistCredentialsInKeychain?: boolean;
   sessionTimeoutMinutes?: string;
 };
 
@@ -84,10 +83,6 @@ function applySnapshot(snapshot: {
 
 export function isExtensionSessionEnabled(): boolean {
   return preferences().enableExtensionSession !== false;
-}
-
-export function isKeychainPersistEnabled(): boolean {
-  return preferences().persistCredentialsInKeychain === true;
 }
 
 export function getExtensionSessionTimeoutMs(): number {
