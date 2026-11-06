@@ -848,8 +848,19 @@ export default function SearchPasswords() {
     applyManagerSelection(managerId);
   }
 
+  // Shared by the loading and the main list so text typed while loading is not lost.
+  const searchBarProps = {
+    searchText,
+    onSearchTextChange: (text: string) => {
+      markActivity();
+      setSearchText(text);
+    },
+    searchBarPlaceholder: "Search passwords...",
+    throttle: true,
+  };
+
   if (isLoadingVault || isLoadingLastManager || isLoadingAdapters) {
-    return <List isLoading navigationTitle="Password Managers" />;
+    return <List isLoading navigationTitle="Password Managers" {...searchBarProps} />;
   }
 
   if (!isLoadingAdapters && selectableAdapters.length === 0) {
@@ -910,13 +921,7 @@ export default function SearchPasswords() {
   return (
     <List
       navigationTitle={isAllSelected ? "All Password Managers" : (selectedAdapter?.name ?? "Password Managers")}
-      searchText={searchText}
-      onSearchTextChange={(text) => {
-        markActivity();
-        setSearchText(text);
-      }}
-      searchBarPlaceholder="Search passwords..."
-      throttle
+      {...searchBarProps}
       isLoading={isLoadingAdapters || isLoadingVault || isLoadingLastManager || isLoadingItems}
       actions={
         selectedAdapter || isAllSelected ? (
