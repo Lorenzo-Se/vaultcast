@@ -1,105 +1,153 @@
-# Password Managers (Raycast Extension)
+# Password Managers for Raycast
 
-Raycast-Extension mit generalisiertem CLI-Adapter-System für Password Manager. Built-in-Adapter liegen unter `src/adapters/`, Third-Party-Adapter können per Stdio-Protokoll extern hinzugefügt werden.
+Search, copy and paste credentials from any CLI-based password manager — right from [Raycast](https://raycast.com).
+
+The extension is built around a pluggable **adapter system**: built-in adapters ship with the extension, and third-party adapters can be added at runtime through a simple stdio protocol — no fork or rebuild required.
+
+![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Raycast](https://img.shields.io/badge/Raycast-extension-FF6363)
 
 ## Features
 
-- Suchen und Auflisten von Vault-Einträgen
-- Passwort, Username und TOTP kopieren
-- Direkt einfügen in die aktive App (Paste)
-- Multi-Manager-Umschalter in der Suche
-- PIN-Entsperrung für Proton Pass (6-stellige Session-PIN)
-- Externe Third-Party-Adapter über konfigurierbaren Ordner
-- Touch ID / Apple Watch / Gerätecode für die Extension-Session nach Timeout (macOS, lokal/dev)
+- **Fast vault search** across one or all configured password managers at once
+- **Copy or paste** passwords, usernames, emails and TOTP codes into the frontmost app
+- **Open in browser** or jump straight to the item in the password manager
+- **Multi-manager switcher** with available, locked and unavailable managers grouped
+- **Pluggable adapters** — add any password manager via an external script and a JSON manifest
+- **Extension session** — unlock once, then silently re-unlock managers until the session times out
+- **Touch ID / Apple Watch / device passcode** to resume a locked session (macOS)
+- **PIN unlock** for Proton Pass (6-digit session PIN)
+- **Optional TOTP auto-copy** a few seconds after copying a password
 
-## Entwicklung
+### Supported password managers
+
+| Manager                                    | Type     | Notes                                       |
+| ------------------------------------------ | -------- | ------------------------------------------- |
+| [Proton Pass](https://proton.me/pass)      | Built-in | Uses `pass-cli`, supports session PIN       |
+| _Your manager_                             | External | Write an adapter — see [Adapters](#adapters) |
+
+## Requirements
+
+- [Raycast](https://raycast.com) on macOS or Windows
+- Node.js 22+ and npm
+- The CLI of your password manager (e.g. `pass-cli` for Proton Pass)
+- macOS only, for Touch ID: Xcode Command Line Tools (`xcode-select --install`) — the full Xcode app is **not** required
+
+## Installation
+
+The extension is not published in the Raycast Store. Install it locally:
 
 ```bash
+git clone https://github.com/Lorenzo-Se/raycast_pwm.git
+cd raycast_pwm
 npm install
 npm run dev
 ```
 
-Öffne Raycast → **Developer** → den laufenden Dev-Mode-Extension nutzen → **Search Passwords**.
+Then open Raycast and run **Search Passwords**.
 
-Touch ID kompiliert ein kleines Swift-CLI (`swift/BiometricAuth/main.swift`) mit **swiftc** aus den Command Line Tools — die volle Xcode-App ist nicht nötig. `npm run dev` / `npm run build` rufen `npm run build-biometric` und `npm run build-session-helper` zuerst auf.
+To install a persistent local build instead of running dev mode:
 
-Die Extension-Session läuft über einen detached **Session-Helper** (`assets/session-helper.mjs`): Credentials bleiben nur im Helper-RAM und überleben Extension-Remounts, solange Raycast läuft. Es werden keine Klartext-Dateien in `/tmp` geschrieben. Der Helper beendet sich automatisch, wenn Raycast beendet wird.
+```bash
+npm run build
+```
 
-Der Raycast Store lehnt Keychain-Zugriff ab — Touch-ID-Re-Auth ist für lokale/Dev-Builds gedacht, nicht für Store-Submission.
+## Usage
 
-### Extension-Einstellungen
+| Action           | macOS     | Windows     |
+| ---------------- | --------- | ----------- |
+| Paste password   | `⌘ ⇧ ↩`   | `Ctrl ⇧ ↵`  |
+| Copy password    | `⌘ ⇧ C`   | `Ctrl ⇧ C`  |
+| Copy email       | `⌘ C`     | `Ctrl C`    |
+| Copy TOTP        | `⌘ T`     | `Ctrl T`    |
 
-| Einstellung                          | Beschreibung                                                                                                                   |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Default Manager                      | Built-in-Adapter im Dropdown (oder Auto)                                                                                       |
-| Default Manager Override             | Adapter-ID für externe Adapter als Default                                                                                     |
-| External Adapters Directory          | Ordner mit Third-Party-Adaptern, z. B. `~/.config/raycast-pwm/adapters`                                                        |
-| CLI Path Overrides (JSON)            | macOS: `{"1password": "/opt/homebrew/bin/op"}` · Windows: `{"protonpass": "%LOCALAPPDATA%\\Programs\\pass-cli\\pass-cli.exe"}` |
-| Close window after copying           | Raycast nach Copy schließen                                                                                                    |
-| Auto-copy TOTP after password action | TOTP nach 5 Sekunden automatisch kopieren                                                                                      |
-| Session timeout (minutes)            | Idle-Lock nach 1–1440 Minuten (Default 15). Mit Extension-Session: Touch ID. Ohne: Password Manager erneut entsperren          |
-| Enable extension session             | Eigene Raycast-Session: Master-PW/PIN im Session-Helper-RAM, stilles Re-Unlock der Manager bis Timeout oder Raycast-Quit (Default an) |
-| Remember in Keychain                 | macOS: Credentials in der Keychain, damit Touch ID auch nach einem Raycast-Neustart geht (Default aus)                         |
+All other actions (open in browser, paste email, copy username, open in password manager, lock session, reload items) are available from the action panel (`⌘ K`).
 
-## Built-in Password Manager hinzufügen
+Use the dropdown in the search bar to switch between managers or to search **all managers** at once.
 
-Siehe [src/adapters/README.md](src/adapters/README.md).
+## Configuration
 
-Kurzversion:
+| Preference                           | Description                                                                                                                         |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Default Manager                      | Built-in adapter to use by default, or **Auto** for the first available one                                                         |
+| Default Manager Override             | Adapter ID to use as default (e.g. for external adapters). Takes precedence over the dropdown                                       |
+| External Adapters Directory          | Folder containing third-party adapters, e.g. `~/.config/raycast-pwm/adapters`                                                       |
+| CLI Path Overrides (JSON)            | macOS: `{"1password": "/opt/homebrew/bin/op"}` · Windows: `{"protonpass": "%LOCALAPPDATA%\\Programs\\pass-cli\\pass-cli.exe"}`      |
+| Close window after copying           | Close Raycast after copying a credential (default: on)                                                                              |
+| Auto-copy TOTP after password action | Copy the TOTP code 5 seconds after copying or pasting a password (default: off)                                                     |
+| Enable extension session             | Keep master password / PIN in the session helper's memory and re-unlock managers silently until timeout or Raycast quits (default: on) |
+| Session timeout (minutes)            | Lock after 1–1440 minutes of inactivity (default: 15). With an extension session, resume via Touch ID; otherwise unlock the manager again |
+| Remember in Keychain                 | macOS only. Store credentials in the Keychain so Touch ID works after a Raycast restart (default: off)                               |
 
-1. `src/adapters/<manager>.ts` mit `PasswordManagerAdapter` anlegen
-2. In `src/adapters/index.ts` registrieren
-3. Optional CLI-Pfad in Extension-Einstellungen setzen
+## Security
 
-## Externe Adapter hinzufügen
+- **No plaintext on disk.** Credentials for the extension session are held only in the memory of a detached session helper (`assets/session-helper.mjs`). Nothing is written to `/tmp`.
+- **Bound to Raycast.** The session helper survives extension remounts but exits automatically when Raycast quits.
+- **Idle lock.** Sessions lock after the configured timeout; resuming requires biometric or device authentication.
+- **Keychain is opt-in.** Persisting credentials in the macOS Keychain is disabled by default.
+- **Biometrics via a native helper.** Touch ID is handled by a small Swift CLI (`swift/BiometricAuth/main.swift`) compiled with `swiftc` during `npm run dev` / `npm run build`.
 
-1. Referenz kopieren:
+> [!NOTE]
+> The Raycast Store does not allow Keychain access, so Touch ID re-authentication is intended for local builds only.
+
+## Adapters
+
+### Built-in adapters
+
+1. Create `src/adapters/<manager>.ts` implementing `PasswordManagerAdapter`
+2. Register it in `src/adapters/index.ts`
+3. Optionally set a CLI path override in the extension preferences
+
+### External adapters
+
+External adapters are standalone scripts that talk to the extension over stdio. Each adapter lives in its own folder with a `pwm-adapter.json` manifest and a script.
 
 ```bash
 mkdir -p ~/.config/raycast-pwm/adapters
 cp -R examples/external-adapter/protonpass ~/.config/raycast-pwm/adapters/protonpass
 ```
 
-2. In Raycast **External Adapters Directory** setzen: `~/.config/raycast-pwm/adapters`
+Then set **External Adapters Directory** to `~/.config/raycast-pwm/adapters` in the extension preferences.
 
-3. Pro Adapter einen Unterordner mit `pwm-adapter.json` + Script
+- Protocol and authentication: [src/adapters/README.md](src/adapters/README.md)
+- Reference adapter: [Proton Pass](examples/external-adapter/protonpass/README.md)
 
-Protokoll und Auth: [src/adapters/README.md](src/adapters/README.md)
-
-Referenz-Adapter: [examples/external-adapter/protonpass](examples/external-adapter/protonpass/README.md), [examples/external-adapter/threepass](examples/external-adapter/threepass/README.md)
-
-## Projektstruktur
+## Project structure
 
 ```
 src/
-├── search-passwords.tsx   # Haupt-Command (UI)
-├── unlock-form.tsx        # Master-PW/PIN + Touch ID
-├── types.ts               # Adapter-Interface
-├── registry.ts            # Adapter-Registry
-├── registry/
-│   └── load-external-adapters.ts
-├── adapters/
-│   ├── index.ts           # Built-in Adapter-Liste
-│   ├── external-protocol.ts
-│   ├── external-script-adapter.ts
-│   ├── protonpass.ts
-│   └── README.md
-└── utils/
-    ├── adapter-auto-unlock.ts
-    ├── biometric-auth.ts
-    ├── cli.ts
-    ├── credential-vault.ts
-    ├── items.ts
-    ├── paths.ts
-    ├── raycast-process.ts
-    └── session-helper-client.ts
+├── search-passwords.tsx         # Main command (UI)
+├── unlock-form.tsx              # Master password / PIN + Touch ID
+├── types.ts                     # Adapter interface
+├── registry.ts                  # Adapter registry
+├── registry/                    # External adapter loading
+├── adapters/                    # Built-in adapters + external protocol
+├── session-helper/              # Session helper IPC protocol
+├── hooks/                       # React hooks
+└── utils/                       # CLI, biometrics, credential vault, helpers
 
-assets/session-helper.mjs              # Session-Helper (RAM-only, IPC)
-swift/BiometricAuth/                   # Touch ID + Keychain CLI (macOS, swiftc)
-examples/external-adapter/protonpass/  # Proton Pass CLI (extern)
-examples/external-adapter/threepass/   # ThreePass (extern, persistent + Master-PW)
+assets/session-helper.mjs        # Session helper (RAM-only, IPC)
+swift/BiometricAuth/             # Touch ID + Keychain CLI (macOS)
+examples/external-adapter/       # Reference adapter (Proton Pass)
+scripts/                         # Build scripts
 ```
 
-## Lizenz
+## Development
 
-MIT
+```bash
+npm run dev        # Start Raycast dev mode
+npm run build      # Build into ~/.config/raycast/extensions/raycast-pwm
+npm run lint       # Lint
+npm run fix-lint   # Lint and auto-fix
+```
+
+`npm run dev` and `npm run build` compile the biometric helper and the session helper first.
+
+## Contributing
+
+Issues and pull requests are welcome. New password manager support is best added as an external adapter first — see [src/adapters/README.md](src/adapters/README.md).
+
+## License
+
+Released under the [MIT License](LICENSE).

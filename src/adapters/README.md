@@ -133,7 +133,7 @@ Beispiel:
     adapter.js
 ```
 
-Referenz: [`examples/external-adapter/protonpass`](../../examples/external-adapter/protonpass/README.md), [`examples/external-adapter/threepass`](../../examples/external-adapter/threepass/README.md)
+Referenz: [`examples/external-adapter/protonpass`](../../examples/external-adapter/protonpass/README.md)
 
 ### Manifest (`pwm-adapter.json`)
 

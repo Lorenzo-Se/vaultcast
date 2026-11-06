@@ -887,7 +887,7 @@ export default function SearchPasswords() {
         ? `Scanning \`${externalDirectory}\` for subfolders with \`pwm-adapter.json\`.`
         : "Set extension preference **External Adapters Directory** (e.g. `~/.config/raycast-pwm/adapters`).",
       "",
-      "See `examples/external-adapter/protonpass` or `examples/external-adapter/threepass` for reference implementations.",
+      "See `examples/external-adapter/protonpass` for a reference implementation.",
       "",
       "## CLI path overrides",
       "",
