@@ -76,6 +76,7 @@ Use the dropdown in the search bar to switch between managers or to search **all
 
 - **No plaintext on disk.** Credentials for the extension session are held only in the memory of a detached session helper (`assets/session-helper.mjs`). Nothing is written to `/tmp`.
 - **Bound to Raycast.** The session helper survives extension remounts but exits automatically when Raycast quits.
+- **Short-lived clipboard.** Copied credentials are marked as concealed, so Raycast's clipboard history and other clipboard managers skip them, and the clipboard is cleared after 2 minutes unless you've copied something else since.
 - **Idle lock.** Sessions lock after the configured timeout; resuming requires biometric or device authentication.
 - **No Keychain.** Credentials are never stored in the macOS Keychain. After Raycast quits, you unlock with your master password or PIN again.
 - **Biometrics via LocalAuthentication.** Touch ID only confirms your presence to resume a locked session. It is implemented in Swift (`swift/`) using Raycast's Swift integration.

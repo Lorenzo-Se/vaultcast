@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Detail,
   Icon,
   Keyboard,
@@ -44,11 +43,13 @@ import {
   rememberCredentials,
   subscribeToExtensionSession,
 } from "./utils/credential-vault";
+import { CLIPBOARD_CLEAR_DELAY_SECONDS, copySecret, pasteSecret } from "./utils/clipboard";
 import { filterVaultItems, sortVaultItems } from "./utils/items";
 import { loadLastManagerId, saveLastManagerId } from "./utils/last-manager-selection";
 import { ALL_MANAGERS_ID, ALL_MANAGERS_TITLE } from "./utils/manager-selection";
 
 const TOTP_DELAY_MS = 5000;
+const CLIPBOARD_CLEAR_MESSAGE = `Clipboard clears in ${CLIPBOARD_CLEAR_DELAY_SECONDS / 60} minutes`;
 const SESSION_DISPOSE_REMOUNT_GRACE_MS = 250;
 
 let pendingTotpCopies = 0;
@@ -211,8 +212,8 @@ async function scheduleTotpCopy(adapter: PasswordManagerAdapter, item: VaultItem
       return;
     }
 
-    await Clipboard.copy(totp);
-    await showToast({ style: Toast.Style.Success, title: "TOTP copied" });
+    await copySecret(totp);
+    await showToast({ style: Toast.Style.Success, title: "TOTP copied", message: CLIPBOARD_CLEAR_MESSAGE });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -252,7 +253,7 @@ async function copyCredential(
   closeAfterCopy: boolean,
   options?: CredentialActionOptions,
 ): Promise<void> {
-  await Clipboard.copy(value);
+  await copySecret(value);
 
   const scheduleTotp = startScheduledTotpCopy(options);
 
@@ -260,7 +261,7 @@ async function copyCredential(
     {
       style: Toast.Style.Success,
       title: `${label} copied`,
-      message: scheduleTotp ? "TOTP in 5 seconds" : undefined,
+      message: scheduleTotp ? "TOTP in 5 seconds" : CLIPBOARD_CLEAR_MESSAGE,
     },
     closeAfterCopy,
   );
@@ -273,7 +274,7 @@ async function copyCredential(
 }
 
 async function pasteCredential(label: string, value: string, options?: CredentialActionOptions): Promise<void> {
-  await Clipboard.paste(value);
+  await pasteSecret(value);
 
   const scheduleTotp = startScheduledTotpCopy(options);
 
@@ -281,7 +282,7 @@ async function pasteCredential(label: string, value: string, options?: Credentia
     {
       style: Toast.Style.Success,
       title: `${label} pasted`,
-      message: scheduleTotp ? "TOTP in 5 seconds" : undefined,
+      message: scheduleTotp ? "TOTP in 5 seconds" : CLIPBOARD_CLEAR_MESSAGE,
     },
     true,
   );
