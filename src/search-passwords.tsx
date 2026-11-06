@@ -860,7 +860,7 @@ export default function SearchPasswords() {
   };
 
   if (isLoadingVault || isLoadingLastManager || isLoadingAdapters) {
-    return <List isLoading navigationTitle="Password Managers" {...searchBarProps} />;
+    return <List isLoading navigationTitle="Vaultcast" {...searchBarProps} />;
   }
 
   if (!isLoadingAdapters && selectableAdapters.length === 0) {
@@ -920,7 +920,7 @@ export default function SearchPasswords() {
 
   return (
     <List
-      navigationTitle={isAllSelected ? "All Password Managers" : (selectedAdapter?.name ?? "Password Managers")}
+      navigationTitle={isAllSelected ? "All Password Managers" : (selectedAdapter?.name ?? "Vaultcast")}
       {...searchBarProps}
       isLoading={isLoadingAdapters || isLoadingVault || isLoadingLastManager || isLoadingItems}
       actions={

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-pwm",
-  "title": "Password Managers",
-  "description": "Access password managers via CLI adapters",
+  "title": "Vaultcast",
+  "description": "Search, copy and paste credentials from CLI-based password managers",
   "icon": "icon.png",
   "author": "seml",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "search-passwords",
       "title": "Search Passwords",
-      "subtitle": "Password Managers",
+      "subtitle": "Vaultcast",
       "icon": "icon.png",
       "description": "Search and copy credentials from configured password manager CLIs",
       "mode": "view"

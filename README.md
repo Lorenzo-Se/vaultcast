@@ -1,6 +1,6 @@
-# Password Managers for Raycast
+# Vaultcast
 
-Search, copy and paste credentials from any CLI-based password manager — right from [Raycast](https://raycast.com).
+**Vaultcast** is a [Raycast](https://raycast.com) extension to search, copy and paste credentials from any CLI-based password manager.
 
 The extension is built around a pluggable **adapter system**: built-in adapters ship with the extension, and third-party adapters can be added at runtime through a simple stdio protocol — no fork or rebuild required.
 
