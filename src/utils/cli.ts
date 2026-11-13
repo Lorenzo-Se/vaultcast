@@ -162,6 +162,7 @@ export function parseJson<T>(stdout: string): T {
   try {
     return JSON.parse(stdout) as T;
   } catch {
-    throw new CliError(`Failed to parse CLI JSON output: ${stdout.slice(0, 200)}`);
+    // No stdout excerpt (nor the SyntaxError, which quotes it): the output may contain secrets.
+    throw new CliError(`Failed to parse CLI JSON output (${stdout.length} characters)`);
   }
 }
