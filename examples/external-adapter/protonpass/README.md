@@ -62,4 +62,4 @@ protonpass-external
 
 ## Protocol
 
-See [src/adapters/README.md](../../../src/adapters/README.md) for the external adapter protocol and session lifecycle.
+See the [external adapter protocol reference](https://github.com/Lorenzo-Se/raycast_pwm/blob/81f49659af5702ed0bc021967f94f30e1390c73c/src/adapters/README.md#externe-adapter-third-party) for the external adapter protocol and session lifecycle.
